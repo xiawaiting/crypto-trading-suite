@@ -37,4 +37,4 @@ import { AuthGuard } from './user/auth.guard'
     },
   ],
 })
-export class App
+export class AppModule {}
