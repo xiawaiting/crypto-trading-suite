@@ -277,4 +277,44 @@ export async function listContainersUtil(
  * */
 /*
 export async function listContainersUtil2(): Promise<Result> {
-  const docker
+  const docker = new Docker()
+  try {
+    // 获取所有容器
+    const containers = await docker.listContainers()
+
+    return {
+      code: 1,
+      msg: 'success',
+      data: containers,
+    }
+
+    // 获取指定ID的容器
+    // const containerId = 'your-container-id';
+    // const container = docker.getContainer(containerId);
+    // const containerData = await container.inspect();
+    // console.log('容器ID:', containerData.Id);
+    // console.log('容器名称:', containerData.Name);
+    // console.log('容器状态:', containerData.State);
+    // console.log('容器创建时间:', containerData.Created);
+    // console.log('------------------------');
+  } catch (error) {
+    console.error('listContainers', error)
+    return {
+      code: 0,
+      msg: error,
+    }
+  }
+}
+*/
+
+/*
+export function getRunningDockerContainersSimple() {
+  const runningContainers = exec('docker ps --format "{{.Names}}"', {
+    silent: true,
+  })
+    .stdout.trim()
+    .split(/\s+/)
+
+  return runningContainers
+}
+*/
