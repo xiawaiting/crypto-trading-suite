@@ -151,4 +151,130 @@ export function startContainer(containerId: string): boolean {
 }
 
 // Use Image
-export async function startC
+export async function startContainerUseImage(
+  containerId: string,
+): Promise<Result> {
+  console.log('startContainerUseImage', containerId)
+  const containerName = 'my-container'
+  const containerImage = 'my-container-image'
+  const port = '8080'
+
+  // 启动容器
+  const startContainer = exec(
+    `docker run -d -p ${port}:${port} --name ${containerName} ${containerImage}`,
+  )
+
+  // 检查容器是否成功启动
+  if (startContainer.code !== 0) {
+    return { code: fail, msg: 'Container started successfully.' }
+  } else {
+    return { code: success, msg: 'Error: Container start failed.' }
+  }
+}
+
+// 运行dockerfile构建image
+export async function buildDockerImage(
+  dockerfileName: string,
+  imageName: string,
+): Promise<{ status: boolean; msg: string }> {
+  const { code, stdout, stderr } = await exec(
+    `docker build -f Dockerfile.${dockerfileName} . -t ${imageName}`,
+  )
+
+  if (code !== 0) {
+    console.error('Docker build failed!', stderr)
+    return {
+      status: false,
+      msg: stderr,
+    }
+  }
+
+  return {
+    status: true,
+    msg: `Docker build successful!${stdout}`,
+  }
+}
+
+export function isDockerImageExist(imageName: string): boolean {
+  const result = exec(`docker images -q ${imageName}`)
+  return result.stdout.trim() !== ''
+}
+
+// 使用Dockerode库来获取Docker镜像列表,包含了每个镜像的名称、版本号、ID等信息。
+export async function listImgUtil(): Promise<ResultWithData<ImageType[]>> {
+  const docker = new Docker()
+
+  try {
+    const images = await docker.listImages()
+    console.log('images==>', images)
+
+    const imageList = images.map((image) => {
+      const repoTags = image.RepoTags[0].split(':')
+      const repoId = image.Id.split(':')
+      return {
+        name: repoTags[0],
+        id: repoId[1].slice(0, 12),
+        size: image.Size,
+        created: image.Created,
+        containers: image.Containers,
+      }
+    })
+
+    return {
+      code: 1,
+      msg: 'success',
+      data: imageList,
+    }
+  } catch (error) {
+    console.error(error)
+    return {
+      code: 0,
+      msg: error,
+      data: [],
+    }
+  }
+}
+
+// 使用Dockerode库来获取Docker container包含停止的和运行的
+// all: true`表示包括停止的container。
+export async function listContainersUtil(
+  isRun: boolean,
+): Promise<ResultWithData<DockerContainer[]>> {
+  const docker = new Docker()
+  try {
+    // 获取所有容器
+    const containers = (await docker.listContainers({
+      all: !isRun,
+    })) as DockerContainer[]
+
+    return {
+      code: success,
+      msg: 'success',
+      data: containers,
+    }
+
+    // 获取指定ID的容器
+    // const containerId = 'your-container-id';
+    // const container = docker.getContainer(containerId);
+    // const containerData = await container.inspect();
+    // console.log('容器ID:', containerData.Id);
+    // console.log('容器名称:', containerData.Name);
+    // console.log('容器状态:', containerData.State);
+    // console.log('容器创建时间:', containerData.Created);
+    // console.log('------------------------');
+  } catch (error) {
+    console.error('listContainers', error)
+    return {
+      code: fail,
+      msg: error,
+      data: [],
+    }
+  }
+}
+
+/**
+ * 使用Dockerode库来获取Docker container包含停止的和运行的
+ * */
+/*
+export async function listContainersUtil2(): Promise<Result> {
+  const docker
