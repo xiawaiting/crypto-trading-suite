@@ -58,4 +58,8 @@ const fetchWithAuth = async <T>(
 
 export const services: Api = {
   getSymbolsPrice: async (symbols = []): Promise<SymbolsPrice[]> => {
-    const url = `${apiConfig.tickerPrice}?s
+    const url = `${apiConfig.tickerPrice}?symbols=["${symbols.join('","')}"]`
+    console.log('getSymbolsPrice-url', url)
+    return await fetchWithAuth(url, { params: {} }, 'GET')
+  },
+}
