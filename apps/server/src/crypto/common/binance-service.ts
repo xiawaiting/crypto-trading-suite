@@ -105,4 +105,141 @@ export class BinanceService {
     symbol?: string
     orderId?: number
     startTime?: number
-   
+    endTime?: number
+    limit?: number
+    recvWindow?: number
+    timestamp?: number
+    useServerTime?: boolean
+  }): Promise<QueryOrderResult[]> {
+    try {
+      return await this.client.allOrders(options)
+    } catch (error) {
+      console.log('allOrders:', error)
+    }
+  }
+
+  async futuresAccountInfo(): Promise<FuturesAccountInfoResult> {
+    try {
+      return await this.client.futuresAccountInfo({ recvWindow: 1000 * 10 })
+    } catch (error) {
+      console.log('futuresAccountInfo:', error)
+    }
+  }
+
+  /**
+   * {
+   *   symbol: 'BTCUSDT',
+   *   recvWindow: 59999,
+   * }
+   */
+  async futuresAllOrders(options: {
+    symbol: string
+    orderId?: number
+    startTime?: number
+    endTime?: number
+    limit?: number
+    recvWindow?: number
+  }): Promise<QueryFuturesOrderResult> {
+    try {
+      return await this.client.futuresAllOrders(options)
+    } catch (error) {
+      console.log('futuresAllOrders:', error)
+    }
+  }
+
+  /**
+   * {
+   *   symbol: 'BTCUSDT',
+   *   recvWindow: 59999,
+   * }
+   */
+  async futuresOpenOrders(options: {
+    symbol?: string
+    useServerTime?: boolean
+  }): Promise<QueryFuturesOrderResult[]> {
+    try {
+      return await this.client.futuresOpenOrders(options)
+    } catch (error) {
+      console.log('futuresOpenOrders:', error)
+    }
+  }
+
+  async futuresCancelAllOpenOrders(options: {
+    symbol: string
+  }): Promise<FuturesCancelAllOpenOrdersResult> {
+    try {
+      return await this.client.futuresCancelAllOpenOrders(options)
+    } catch (error) {
+      console.log('futuresCancelAllOpenOrders:', error)
+    }
+  }
+
+  /**
+   * batchOrders: []
+   */
+  async futuresBatchOrders(options: {
+    batchOrders: NewFuturesOrder[]
+    recvWindow?: number
+    timestamp?: number
+  }): Promise<FuturesOrder[]> {
+    try {
+      return await this.client.futuresBatchOrders(options)
+    } catch (error) {
+      console.log('futuresBatchOrders:', error)
+    }
+  }
+
+  async prices(options?: {
+    symbol?: string
+  }): Promise<{ [index: string]: string }> {
+    try {
+      return await this.client.prices(options)
+    } catch (error) {
+      console.log('spotPrice:', error)
+    }
+  }
+
+  async futuresPrice(options?: {
+    symbol: string
+  }): Promise<{ [index: string]: string }> {
+    try {
+      return await this.client.futuresPrices(options)
+    } catch (error) {
+      console.log('futuresPrice:', error)
+    }
+  }
+
+  /**
+   * { symbol, interval: '5m' }
+   */
+  async candles(options: CandlesOptions): Promise<CandleChartResult[]> {
+    try {
+      return await this.client.candles(options)
+    } catch (error) {
+      console.log('candles:', error)
+    }
+  }
+
+  /*
+  async short(opt?: any) {
+    return await this.exchange.short(opt)
+  }
+  */
+
+  // 找出持仓资源,也可以在 socket userData订阅返回，这里选择拿接口数据
+  async getAccountAsset(symbol: string): Promise<ResultWithData<AssetBalance>> {
+    const { data, code, msg } = await this.getAccountInfo()
+    if (code !== 200) {
+      return {
+        data: null,
+        code,
+        msg,
+      }
+    }
+    const balances = get(data, 'balances', []).filter(
+      (item) => Number(item.free) !== 0,
+    ) as AssetBalance[]
+
+    // test mock
+    /*
+  
