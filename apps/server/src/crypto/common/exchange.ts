@@ -45,4 +45,33 @@ export class Exchange {
     try {
       return await this.futuresOrder(opt, 'BUY')
     } catch (error) {
-      throw new Error(`[order long fail]: ${JSON.st
+      throw new Error(`[order long fail]: ${JSON.stringify(error)}, opt: ${JSON.stringify(opt)}`)
+    }
+  }
+
+  async short(opt: any): Promise<any> {
+    try {
+      return await this.futuresOrder(opt, 'SELL')
+    } catch (error) {
+      throw new Error(`[order short fail]: ${JSON.stringify(error)}, opt: ${JSON.stringify(opt)}`)
+    }
+  }
+  */
+
+  /*
+  private async createFuturesOrder(order: any, price?: number) {
+    const input = {
+      orderId: order.orderId.toString(),
+      clientOrderId: order.clientOrderId,
+      symbol: order.symbol,
+      status: order.status,
+      side: order.side,
+      qty: order.origQty.toString(),
+      price: (price || order.price).toString(),
+      orderTime: order.updateTime,
+    }
+
+    // await this.orderService.createOrder(input)
+  }
+  */
+}
