@@ -242,4 +242,84 @@ export class BinanceService {
 
     // test mock
     /*
-  
+    balances.push({
+      asset: 'IMX',
+      free: '504.54000000',
+      locked: '0.00000000'
+    })
+    */
+    // 2.10 18:02 挂单成交,1.008
+    /*
+    balances.push({
+      asset: 'IMX',
+      free: '991.08',
+      locked: '0.00000000'
+    })
+    */
+    // console.log('balances:', balances);
+    // test mock
+
+    let balance = {} as AssetBalance
+    balances.forEach((item) => {
+      const isInclude = symbol.search(new RegExp(`^${item.asset}`))
+      // console.log('==1.找出持仓asset==:', item);
+      if (isInclude !== -1) {
+        console.log('==2.找到持仓asset==:', item)
+        balance = item
+      }
+    })
+
+    return {
+      data: balance,
+      code,
+      msg,
+    }
+  }
+
+  async getMyTrades(spotOrderParams: SyncSpotOrderParams): Promise<MyTrade[]> {
+    const { symbol, startTime, endTime } = spotOrderParams
+    let options = {} as SyncSpotOrderParams
+    if (startTime && endTime) {
+      options = {
+        symbol,
+        recvWindow: 59999,
+        startTime,
+        endTime,
+      }
+    } else {
+      options = {
+        symbol,
+        recvWindow: 59999,
+        startTime: null,
+        endTime: null,
+      }
+    }
+    return await this.client.myTrades(options)
+  }
+
+  async getFutureTrades(
+    futureOrderParams: SyncFutureOrderParams,
+  ): Promise<GetFuturesOrder[]> {
+    const { symbol, startTime, endTime } = futureOrderParams
+    let options = {} as SyncFutureOrderParams
+    if (startTime && endTime) {
+      options = {
+        symbol,
+        recvWindow: 59999,
+        startTime,
+        endTime,
+      }
+    } else {
+      options = {
+        symbol,
+        recvWindow: 59999,
+        startTime: null,
+        endTime: null,
+      }
+    }
+
+    return (await this.client.futuresAllOrders(
+      options,
+    )) as unknown as GetFuturesOrder[]
+  }
+}
