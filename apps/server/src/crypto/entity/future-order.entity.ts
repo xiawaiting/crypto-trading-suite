@@ -22,4 +22,12 @@ export class FutureOrder {
   @Column({ comment: 'positionSide' }) positionSide: string
   @Column({ comment: 'stopPrice' }) stopPrice: string
   @Column({ comment: 'workingType' }) workingType: string
-  @Column({ comment: 'priceProt
+  @Column({ comment: 'priceProtect' }) priceProtect: number
+  @Column({ comment: 'origType' }) origType: string
+  @Column({ comment: 'time' }) time: number
+  @Column({ comment: 'updateTime' }) updateTime: number
+
+  @Column({ comment: 'strategyStatus' }) strategyStatus?: number
+  @Column('bigint', { comment: 'updatedAt' }) updatedAt?: number
+  @Column('bigint', { comment: 'createdAt' }) createdAt?: number
+}
