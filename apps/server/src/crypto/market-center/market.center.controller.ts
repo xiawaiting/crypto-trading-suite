@@ -25,4 +25,18 @@ export class MarketCenterController {
 
   @Get('statisticsAccount')
   async statisticsAccount(): Promise<ResultWithData<StatisticsAccountRes>> {
-    return await this.marketCenterService.statisti
+    return await this.marketCenterService.statisticsAccount()
+  }
+
+  @Post('addAsset')
+  async addAsset(@Body() asset: AssetType): Promise<Result> {
+    return await this.marketCenterService.addAsset(asset)
+  }
+
+  @Post('assets')
+  async getAssets(
+    @Body() page: PaginationType,
+  ): Promise<ResultWithData<TradeAsset[]>> {
+    return await this.marketCenterService.getAssets(page)
+  }
+}
