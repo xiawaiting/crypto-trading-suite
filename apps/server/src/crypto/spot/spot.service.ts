@@ -90,4 +90,24 @@ export class SpotService {
   }
 
   private async findSpotOrderUtil(id: number): Promise<SpotOrder> {
-    const sql = `select symbol,orderId from spot_orde
+    const sql = `select symbol,orderId from spot_order where id='${id}'`
+    const futureOrder = await this.spotOrderRepo.query(sql)
+    return get(futureOrder, '[0]', {})
+  }
+
+  private async savaSpotOrderUtil(
+    spotOrder: SpotOrder,
+    userId: number,
+  ): Promise<void> {
+    spotOrder.userId = userId
+    const isBuyer = spotOrder.isBuyer ? 1 : 0
+    const isMaker = spotOrder.isBuyer ? 1 : 0
+    const isBestMatch = spotOrder.isBuyer ? 1 : 0
+    await this.spotOrderRepo.save({
+      ...spotOrder,
+      isBuyer,
+      isMaker,
+      isBestMatch,
+    })
+  }
+}
