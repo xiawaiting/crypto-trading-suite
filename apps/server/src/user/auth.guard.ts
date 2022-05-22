@@ -76,4 +76,24 @@ export class AuthGuard implements CanActivate {
           expiresIn,
         })
         // fix cache
- 
+        response.setHeader('Authorization', '')
+      }
+      // To renews end
+
+      // 💡 We're assigning the payload to the request object here
+      // so that we can access it in our route handlers
+      // request['user'] = payload
+    } catch {
+      console.log('auth.guard reject-->')
+
+      throw new UnauthorizedException()
+    }
+
+    return true
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const [type, token] = request.headers.authorization?.split(' ') ?? []
+    return type === 'Bearer' ? token : undefined
+  }
+}
