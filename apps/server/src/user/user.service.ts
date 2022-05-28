@@ -120,3 +120,60 @@ export class UserService {
     if (!users.length) {
       throw new HttpException(`指定 id=${id} 的用户不存在`, 404)
     }
+    return users
+  }
+
+  private async findUserByName(username: string): Promise<User[]> {
+    const users = await this.userRepo.find({
+      where: {
+        username,
+      },
+    })
+
+    if (!users.length) {
+      throw new HttpException(`指定 username=${username} 的用户不存在`, 404)
+    }
+    return users
+  }
+
+  private async findOneByEmailUtil(email: string): Promise<User[]> {
+    const users = await this.userRepo.find({
+      where: {
+        email,
+      },
+    })
+
+    if (!users.length) {
+      throw new HttpException(`指定 email=${email} 的用户不存在`, 404)
+    }
+    return users
+  }
+
+  private async findUserByEmail(email: string): Promise<User[]> {
+    return await this.userRepo.find({
+      where: {
+        email,
+      },
+    })
+  }
+
+  private async saveGoogleUser(userInfo: GoogleAuthType): Promise<User> {
+    const { email, picture, name, id, given_name } = userInfo
+
+    const user = new User()
+    user.email = email
+    user.login = 'google'
+    user.avatar = picture
+    user.username = given_name || name
+    user.nickname = name || given_name
+    // user.bio = null
+    user.phone = null
+    user.jobTitle = null
+    user.password = null
+    user.planType = null
+    user.githubId = null
+    user.googleId = id
+
+    return await this.userRepo.save(user)
+  }
+}
