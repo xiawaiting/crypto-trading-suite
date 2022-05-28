@@ -121,4 +121,19 @@ export class UserController {
         res.status(401).json({ msg: 'Unauthorized' })
       }
 
-      
+      const userRes = await this.authService.getUserFromToken(authToken)
+      // TODO: 不用查询
+      /*
+      const users = await this.userService.findOneByEmail(userRes.data.email)
+      console.log('======>verifyAuth 3:', users)
+      */
+      res.status(200).json({
+        code: success,
+        msg: '查询成功',
+        data: { username: userRes.data.username, email: userRes.data.email },
+      })
+    } catch (error) {
+      res.status(500).json({ msg: 'Unauthorized' })
+    }
+  }
+}
