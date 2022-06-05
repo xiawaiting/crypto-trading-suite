@@ -302,3 +302,372 @@ const setFlags = (modalId: string, flags: Record<string, unknown>): void => {
 }
 
 export function useModal(): NiceModalHandler
+
+export function useModal(
+  modal: string,
+  args?: Record<string, unknown>,
+): NiceModalHandler
+
+export function useModal<
+  T extends React.FC<any>,
+  ComponentProps extends NiceModalArgs<T>,
+  PreparedProps extends Partial<ComponentProps> = object | ComponentProps,
+  RemainingProps = Omit<ComponentProps, keyof PreparedProps> &
+    Partial<ComponentProps>,
+>(
+  modal: T,
+  args?: PreparedProps,
+): Omit<NiceModalHandler, 'show'> & {
+  show: Partial<RemainingProps> extends RemainingProps
+    ? (args?: RemainingProps) => Promise<unknown>
+    : (args: RemainingProps) => Promise<unknown>
+}
+
+export function useModal(modal?: any, args?: any): any {
+  const modals = useContext(NiceModalContext)
+  const contextModalId = useContext(NiceModalIdContext)
+  let modalId: string | null = null
+  const isUseComponent = modal && typeof modal !== 'string'
+  if (!modal) {
+    modalId = contextModalId
+  } else {
+    modalId = getModalId(modal)
+  }
+
+  // Only if contextModalId doesn't exist
+  if (!modalId) throw new Error('No modal id found in NiceModal.useModal.')
+
+  const mid = modalId as string
+  // If use a component directly, register it.
+  useEffect(() => {
+    if (isUseComponent && !MODAL_REGISTRY[mid]) {
+      register(mid, modal as React.FC, args)
+    }
+  }, [isUseComponent, mid, modal, args])
+
+  const modalInfo = modals[mid]
+
+  const showCallback = useCallback(
+    (args?: Record<string, unknown>) => show(mid, args),
+    [mid],
+  )
+  const hideCallback = useCallback(() => hide(mid), [mid])
+  const removeCallback = useCallback(() => remove(mid), [mid])
+  const resolveCallback = useCallback(
+    (args?: unknown) => {
+      modalCallbacks[mid]?.resolve(args)
+      delete modalCallbacks[mid]
+    },
+    [mid],
+  )
+  const rejectCallback = useCallback(
+    (args?: unknown) => {
+      modalCallbacks[mid]?.reject(args)
+      delete modalCallbacks[mid]
+    },
+    [mid],
+  )
+  const resolveHide = useCallback(
+    (args?: unknown) => {
+      hideModalCallbacks[mid]?.resolve(args)
+      delete hideModalCallbacks[mid]
+    },
+    [mid],
+  )
+
+  return {
+    id: mid,
+    args: modalInfo?.args,
+    visible: !!modalInfo?.visible,
+    keepMounted: !!modalInfo?.keepMounted,
+    show: showCallback,
+    hide: hideCallback,
+    remove: removeCallback,
+    resolve: resolveCallback,
+    reject: rejectCallback,
+    resolveHide,
+  }
+}
+export const create = <P extends object>(
+  Comp: React.ComponentType<P>,
+): React.FC<P & NiceModalHocProps> => {
+  return ({ defaultVisible, keepMounted, id, ...props }) => {
+    const { args, show } = useModal(id)
+
+    // If there's modal state, then should mount it.
+    const modals = useContext(NiceModalContext)
+    const shouldMount = !!modals[id]
+
+    useEffect(() => {
+      // If defaultVisible, show it after mounted.
+      if (defaultVisible) {
+        show()
+      }
+
+      ALREADY_MOUNTED[id] = true
+
+      return () => {
+        delete ALREADY_MOUNTED[id]
+      }
+    }, [id, show, defaultVisible])
+
+    useEffect(() => {
+      if (keepMounted) setFlags(id, { keepMounted: true })
+    }, [id, keepMounted])
+
+    const delayVisible = modals[id]?.delayVisible
+    // If modal.show is called
+    //  1. If modal was mounted, should make it visible directly
+    //  2. If modal has not been mounted, should mount it first, then make it visible
+    useEffect(() => {
+      if (delayVisible) {
+        // delayVisible: false => true, it means the modal.show() is called, should show it.
+        show(args)
+      }
+    }, [delayVisible, args, show])
+
+    if (!shouldMount) return null
+    return (
+      <NiceModalIdContext.Provider value={id}>
+        <Comp {...(props as any)} {...args} />
+      </NiceModalIdContext.Provider>
+    )
+  }
+}
+
+// All registered modals will be rendered in modal placeholder
+export const register = <T extends React.FC<any>>(
+  id: string,
+  comp: T,
+  props?: Partial<NiceModalArgs<T>>,
+): void => {
+  if (!MODAL_REGISTRY[id]) {
+    MODAL_REGISTRY[id] = { comp, props }
+  } else {
+    MODAL_REGISTRY[id].props = props
+  }
+}
+
+/**
+ * Unregister a modal.
+ * @param id - The id of the modal.
+ */
+export const unregister = (id: string): void => {
+  delete MODAL_REGISTRY[id]
+}
+
+// The placeholder component is used to auto render modals when call modal.show()
+// When modal.show() is called, it means there've been modal info
+const NiceModalPlaceholder: React.FC = () => {
+  const modals = useContext(NiceModalContext)
+  const visibleModalIds = Object.keys(modals).filter((id) => !!modals[id])
+  visibleModalIds.forEach((id) => {
+    if (!MODAL_REGISTRY[id] && !ALREADY_MOUNTED[id]) {
+      console.warn(
+        `No modal found for id: ${id}. Please check the id or if it is registered or declared via JSX.`,
+      )
+      return
+    }
+  })
+
+  const toRender = visibleModalIds
+    .filter((id) => MODAL_REGISTRY[id])
+    .map((id) => ({
+      id,
+      ...MODAL_REGISTRY[id],
+    }))
+
+  return (
+    <>
+      {toRender.map((t) => (
+        <t.comp key={t.id} id={t.id} {...t.props} />
+      ))}
+    </>
+  )
+}
+
+const InnerContextProvider: any = ({ children }: any) => {
+  const arr = useReducer(reducer, initialState)
+  const modals = arr[0]
+  dispatch = arr[1]
+  return (
+    <NiceModalContext.Provider value={modals}>
+      {children}
+      <NiceModalPlaceholder />
+    </NiceModalContext.Provider>
+  )
+}
+
+// export const Provider: React.FC<Record<string, unknown>> = ({
+export const Provider: any = ({
+  children,
+  dispatch: givenDispatch,
+  modals: givenModals,
+}: {
+  children: ReactNode
+  dispatch?: React.Dispatch<NiceModalAction>
+  modals?: NiceModalStore
+}) => {
+  if (!givenDispatch || !givenModals) {
+    return <InnerContextProvider>{children}</InnerContextProvider>
+  }
+  dispatch = givenDispatch
+  return (
+    <NiceModalContext.Provider value={givenModals}>
+      {children}
+      <NiceModalPlaceholder />
+    </NiceModalContext.Provider>
+  )
+}
+
+/**
+ * Declarative way to register a modal.
+ * @param id - The id of the modal.
+ * @param component - The modal Component.
+ * @returns
+ */
+export const ModalDef: any = ({
+  id,
+  component,
+}: {
+  id: string
+  component: React.FC<any>
+}) => {
+  useEffect(() => {
+    register(id, component)
+    return () => {
+      unregister(id)
+    }
+  }, [id, component])
+  return null
+}
+
+export const antdModal = (
+  modal: NiceModalHandler,
+): {
+  visible: boolean
+  onCancel: () => void
+  onOk: () => void
+  afterClose: () => void
+} => {
+  return {
+    visible: modal.visible,
+    onOk: () => modal.hide(),
+    onCancel: () => modal.hide(),
+    afterClose: () => {
+      // Need to resolve before remove
+      modal.resolveHide()
+      if (!modal.keepMounted) modal.remove()
+    },
+  }
+}
+export const antdModalV5 = (
+  modal: NiceModalHandler,
+): {
+  open: boolean
+  onCancel: () => void
+  onOk: () => void
+  afterClose: () => void
+} => {
+  const { onOk, onCancel, afterClose } = antdModal(modal)
+  return {
+    open: modal.visible,
+    onOk,
+    onCancel,
+    afterClose,
+  }
+}
+export const antdDrawer = (
+  modal: NiceModalHandler,
+): {
+  visible: boolean
+  onClose: () => void
+  afterVisibleChange: (visible: boolean) => void
+} => {
+  return {
+    visible: modal.visible,
+    onClose: () => modal.hide(),
+    afterVisibleChange: (v: boolean) => {
+      if (!v) {
+        modal.resolveHide()
+      }
+      !v && !modal.keepMounted && modal.remove()
+    },
+  }
+}
+export const antdDrawerV5 = (
+  modal: NiceModalHandler,
+): {
+  open: boolean
+  onClose: () => void
+  afterOpenChange: (visible: boolean) => void
+} => {
+  const { onClose, afterVisibleChange: afterOpenChange } = antdDrawer(modal)
+  return {
+    open: modal.visible,
+    onClose,
+    afterOpenChange,
+  }
+}
+export const muiDialog = (
+  modal: NiceModalHandler,
+): { open: boolean; onClose: () => void; onExited: () => void } => {
+  return {
+    open: modal.visible,
+    onClose: () => modal.hide(),
+    onExited: () => {
+      modal.resolveHide()
+      !modal.keepMounted && modal.remove()
+    },
+  }
+}
+
+export const muiDialogV5 = (
+  modal: NiceModalHandler,
+): {
+  open: boolean
+  onClose: () => void
+  TransitionProps: { onExited: () => void }
+} => {
+  return {
+    open: modal.visible,
+    onClose: () => modal.hide(),
+    TransitionProps: {
+      onExited: () => {
+        modal.resolveHide()
+        !modal.keepMounted && modal.remove()
+      },
+    },
+  }
+}
+export const bootstrapDialog = (
+  modal: NiceModalHandler,
+): { show: boolean; onHide: () => void; onExited: () => void } => {
+  return {
+    show: modal.visible,
+    onHide: () => modal.hide(),
+    onExited: () => {
+      modal.resolveHide()
+      !modal.keepMounted && modal.remove()
+    },
+  }
+}
+
+const NiceModal = {
+  Provider,
+  ModalDef,
+  NiceModalContext,
+  create,
+  register,
+  show,
+  hide,
+  remove,
+  useModal,
+  reducer,
+  antdModal,
+  antdDrawer,
+  muiDialog,
+  bootstrapDialog,
+}
+
+export default NiceModal
