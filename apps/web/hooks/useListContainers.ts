@@ -21,4 +21,21 @@ const useListContainers = () => {
       }
     } catch (error) {
       console.error(error)
-      setLoad
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    setLoading(true)
+    listContainers()
+  }, [])
+
+  const refetch = (isRunning?: boolean) => {
+    setLoading(true)
+    listContainers(isRunning)
+  }
+
+  return { loading, data, refetch }
+}
+
+export default useListContainers
