@@ -248,4 +248,139 @@ export default function SpotTable() {
               </Button>
             )}
             {item.strategyStatus === 2 && (
-              <Button danger onClick={() => onRese
+              <Button danger onClick={() => onResetOrderStatus(item)}>
+                Reset
+              </Button>
+            )}
+          </>
+        )
+      },
+    },
+    {
+      id: 'commission',
+      title: 'Commission',
+      dataIndex: 'commission',
+      key: 'commission',
+      width: 100,
+    },
+    {
+      id: 'commissionAsset',
+      title: 'CommissionAsset',
+      dataIndex: 'commissionAsset',
+      key: 'commissionAsset',
+    },
+    {
+      id: 'orderId',
+      title: 'OrderId',
+      dataIndex: 'orderId',
+      key: 'orderId',
+      width: 100,
+    },
+    {
+      id: 'strategyId',
+      title: 'StrategyId',
+      dataIndex: '',
+      key: 'strategyId',
+      width: 100,
+      render(item: SpotOrder) {
+        return (
+          <div>
+            <div>{item.strategyId}</div>
+            <div>UserId:{item.userId}</div>
+          </div>
+        )
+      },
+    },
+    {
+      id: 'isMaker',
+      title: 'IsMaker',
+      dataIndex: 'isMaker',
+      key: 'isMaker',
+      width: 100,
+    },
+    {
+      id: 'isBestMatch',
+      title: 'IsBestMatch',
+      dataIndex: 'isBestMatch',
+      key: 'isBestMatch',
+      width: 100,
+    },
+    {
+      id: 'updatedAt',
+      title: 'Updated',
+      dataIndex: '',
+      key: 'updatedAt',
+      width: 100,
+      render(item: SpotOrder) {
+        return <div>{formatUnixTime(item.updatedAt)}</div>
+      },
+    },
+  ]
+
+  const onChangePage = (current: number, pageSize: number) => {
+    setCurrentPage(current)
+    getSpotOrdersUtil({
+      current,
+      page: pageSize,
+    })
+  }
+
+  const getSpotOrdersUtil = async (spotOrdersParams: SpotOrdersParams) => {
+    const { payload } = (await store.dispatch(
+      fetchSpotOrders(spotOrdersParams),
+    )) as FetchSpotOrdersAction
+    if (payload.code === SUCCESS) {
+      setCurrentPage(payload.data.currentPage)
+      setPageSize(payload.data.pageSize)
+    } else {
+      message.error(payload.msg || 'error')
+    }
+  }
+
+  const onShowSizeChange = (page: number, pageSize: number) => {
+    setPageSize(pageSize)
+    setCurrentPage(page)
+  }
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (selectedRowKeys: React.Key[], selectedRows: SpotOrder[]) => {
+      // console.log(`${selectedRowKeys}`, '--', 'selectedRows: ', selectedRows);
+      setSelectedRowKeys(selectedRowKeys)
+      setSelectRowData(selectedRows)
+    },
+  }
+
+  useEffect(() => {
+    if (!isEmpty(selectedRowKeys)) {
+      console.log('clear selected')
+      setSelectedRowKeys([])
+    }
+  }, [data])
+
+  useEffect(() => {
+    getSpotOrdersUtil({})
+  }, [])
+
+  return (
+    <div className="table-box-container">
+      <Table
+        rowSelection={rowSelection}
+        rowKey="id"
+        columns={columns}
+        dataSource={data}
+        className="table-box"
+        pagination={false}
+      />
+      <div className="spot-operation">
+        <Button onClick={() => oncreateStrategy()} className="green-btn">
+          Create strategy
+        </Button>
+        <Button
+          onClick={() => onMergeStrategy()}
+          className="merge-btn neutral-btn"
+        >
+          Merge Order
+        </Button>
+        <Button danger onClick={() => onCloseStrategy()}>
+          Close st
