@@ -383,4 +383,35 @@ export default function SpotTable() {
           Merge Order
         </Button>
         <Button danger onClick={() => onCloseStrategy()}>
-          Close st
+          Close strategy
+        </Button>
+      </div>
+
+      <MergeOrderModal
+        id="mergeOrderModal"
+        mergeOrders={selectRowData}
+        title="Close strategy"
+        orderType="spot"
+        modalCallBack={modalCallBack}
+      />
+
+      <StgCloseModal
+        id="closeStrategyModal"
+        closeOrders={selectRowData}
+        title="Merge order"
+        orderType="spot"
+        modalCallBack={modalCallBack}
+      />
+
+      <Pagination
+        current={currentPage}
+        total={total}
+        pageSizeOptions={['10', '20', '40']}
+        showTotal={(total) => `Total:${total}`}
+        showSizeChanger={true}
+        onChange={onChangePage}
+        onShowSizeChange={onShowSizeChange}
+      />
+    </div>
+  )
+}
