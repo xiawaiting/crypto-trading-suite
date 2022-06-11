@@ -109,4 +109,143 @@ export default function SpotTable() {
     }
 
     selectRowData.sort((a: SpotOrder, b: SpotOrder) => {
-      r
+      return Number(b.time) - Number(a.time)
+    })
+
+    NiceModal.show('mergeOrderModal')
+
+    /*
+    NiceModal.show(mergeOrderModal, selectRowData).then((selectRowData) => {
+      // userModal.show(mergeOrderModal,selectRowData).then((selectRowData) => {
+      // setUsers([newUser, ...users]);
+    });
+    */
+  }
+
+  const onCloseStrategy = async () => {
+    if (!selectedRowKeys.length) {
+      message.warning('select empty')
+
+      return
+    }
+
+    const isStrategyRelatedOrder = isStrategyRelatedOrderUtil(selectRowData)
+    if (isStrategyRelatedOrder) {
+      message.warning('Can not select closed order to close')
+      return
+    }
+
+    selectRowData.sort((a: SpotOrder, b: SpotOrder) => {
+      return Number(a.time) - Number(b.time)
+    })
+
+    NiceModal.show('closeStrategyModal')
+  }
+
+  const modalCallBack = () => {
+    getSpotOrdersUtil({
+      current: 1,
+      page: 10,
+    })
+    setSelectRowData([])
+    setSelectedRowKeys([])
+  }
+
+  const columns = [
+    {
+      id: 'time',
+      title: 'Date',
+      dataIndex: '',
+      key: 'time',
+      width: 100,
+      render(item: SpotOrder) {
+        return <div>{formatUnixTime(Number(item.time))}</div>
+      },
+    },
+    {
+      id: 'symbol',
+      title: 'Symbol',
+      dataIndex: 'symbol',
+      key: 'symbol',
+      width: 100,
+    },
+    {
+      id: 'isBuyer',
+      title: 'Side',
+      dataIndex: '',
+      key: 'isBuyer',
+      width: 100,
+      render(item: SpotOrder) {
+        return (
+          <div>
+            {item.isBuyer ? (
+              <span className="primary-c">BUY</span>
+            ) : (
+              <span className="warm-c">SELL</span>
+            )}
+          </div>
+        )
+      },
+    },
+    /*
+    0 : original 1 : running 2 : ended
+    */
+    {
+      id: 'strategyStatus',
+      title: 'Status',
+      dataIndex: '',
+      key: 'strategyStatus',
+      width: 100,
+      render(item: SpotOrder) {
+        return <span>{strategyStatusMap[item.strategyStatus]}</span>
+      },
+    },
+    {
+      id: 'price',
+      title: 'Price',
+      dataIndex: 'price',
+      key: 'price',
+      width: 100,
+    },
+    {
+      id: 'qty',
+      title: 'qty',
+      dataIndex: '',
+      key: 'qty',
+      width: 100,
+      render(item: SpotOrder) {
+        return (
+          <div>
+            <div>{item.qty}</div>
+            <div>{item.quoteQty}</div>
+          </div>
+        )
+      },
+    },
+    {
+      id: 'action',
+      title: 'Action',
+      dataIndex: '',
+      key: 'action',
+      width: 100,
+      render(item: SpotOrder) {
+        return (
+          <>
+            {item.strategyStatus === 0 && (
+              <Button
+                onClick={() => createStrategyUtil([item])}
+                className="green-btn"
+              >
+                Create
+              </Button>
+            )}
+            {item.strategyStatus === 1 && (
+              <Button
+                onClick={() => onRebuildOrderStatus(item)}
+                className="warm-btn"
+              >
+                Rebuild
+              </Button>
+            )}
+            {item.strategyStatus === 2 && (
+              <Button danger onClick={() => onRese
