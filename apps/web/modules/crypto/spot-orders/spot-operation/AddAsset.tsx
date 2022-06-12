@@ -75,4 +75,11 @@ export default function AddAsset(props: Props) {
         </Form.Item> */}
 
         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-          <But
+          <Button className="bright-btn" htmlType="submit">
+            Submit
+          </Button>
+        </Form.Item>
+      </Form>
+    </Modal>
+  )
+}
