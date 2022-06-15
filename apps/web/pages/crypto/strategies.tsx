@@ -7,3 +7,5 @@ export default function StrategiesPage() {
     <Layout>
       <Strategies />
     </Layout>
+  )
+}
