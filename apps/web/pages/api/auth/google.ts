@@ -16,4 +16,20 @@ export default withIronSessionApiRoute(async (req, res) => {
     if (result.statusCode === SUCCESS) {
       req.session.loginStatus = SUCCESS
       const { avatar, email, username, token } = result.data
- 
+      req.session.payload = { avatar, email, username }
+      req.session.loginStatus = SUCCESS
+      await req.session.save()
+      res.redirect(
+        `${webRedirect}?from=${THIRD_PARTY_LOGIN_TAG}&codeToken=${token}&isLogin=${SUCCESS}`,
+      )
+    } else {
+      req.session.loginStatus = FAIL
+      await req.session.save()
+      res.redirect(`${loginRedirect}?isLogin=${FAIL}&msg=${result.message}`)
+    }
+  } catch (error: unknown) {
+    req.session.loginStatus = FAIL
+    await req.session.save()
+    res.redirect(`${loginRedirect}?isLogin=${FAIL}&msg=${error}`)
+  }
+}, sessionOptions)
