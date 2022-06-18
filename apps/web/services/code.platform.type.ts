@@ -68,4 +68,26 @@ export interface GetUserResponse {
 }
 
 export interface Api {
-  codeList: (options?: C
+  codeList: (options?: CodeListOptions) => Promise<ResType<CodeListResponse>>
+  runCode: (options?: RunCodeOptions) => Promise<ResType<RunCodeResponse>>
+  getContainerStatus: (
+    options?: ContainerStatusOptions,
+  ) => Promise<ResType<ContainerStatusResponse>>
+  getRunningContainer: (
+    options?: RunningContainerOptions,
+  ) => Promise<ResType<RunningContainerResponse>>
+  buildDockerImage: (
+    options?: BuildDockerImageOptions,
+  ) => Promise<ResType<BuildDockerImageResponse>>
+  listImg: () => Promise<ResType<ListImgResponse>>
+  listContainers: (
+    options: ListContainersOptions,
+  ) => Promise<ResType<ListContainersResponse>>
+  startContainer: (
+    options?: StartContainerOptions,
+  ) => Promise<ResType<StartContainerResponse>>
+  stopContainer: (
+    options?: StopContainerOptions,
+  ) => Promise<ResType<StopContainerResponse>>
+  getUser: (options?: GetUserOptions) => Promise<ResType<GetUserResponse>>
+}
