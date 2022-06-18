@@ -67,4 +67,5 @@ export type FetchFutureOrdersAction = {
 }
 
 export interface FutureFilter {
-  symbol: str
+  symbol: string
+}
