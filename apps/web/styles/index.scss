@@ -18,4 +18,151 @@
   margin-bottom: 10px;
 }
 
-.common-to
+.common-top2-mg {
+  margin-top: 20px;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.flex-xcenter {
+  justify-content: center;
+}
+
+.flex-ycenter {
+  align-items: center;
+}
+
+.warm-btn {
+  color: #f5c504;
+  border-color: #f5c504;
+}
+
+.warm-btn:hover {
+  border-color: #b08e04 !important;
+  color: #b08e04 !important;
+}
+
+.bright-btn {
+  color: #042ff5;
+  border-color: #042ff5;
+}
+
+.bright-btn:hover {
+  color: #042ff5;
+  border-color: #042ff5;
+}
+
+.purple-btn {
+  color: #9d04f5;
+  border-color: #9d04f5;
+}
+
+.purple-btn:hover {
+  color: #042ff5;
+  border-color: #042ff5;
+}
+
+.green-btn {
+  color: #36d964;
+  border-color: #36d964;
+}
+
+.green-btn:hover {
+  color: #49f179 !important;
+  border-color: #aff2c2 !important;
+}
+
+.neutral-btn {
+  border-color: #000000b0;
+  color: #000000b0;
+}
+
+.neutral-btn:hover {
+  color: #000000e0 !important;
+  border-color: #000000e0 !important;
+}
+
+.primary-btn {
+  color: #1677ff;
+  border-color: #2b77e1;
+}
+
+.warm-c {
+  color: red;
+}
+
+.primary-c {
+  color: #1677ff;
+}
+
+/** spot start*/
+/** spot start*/
+.spot-container {
+  width: 90%;
+  margin: 0 auto;
+
+  .spot-operation {
+    padding: 20px 0;
+    .merge-btn {
+      margin: 0 10px;
+    }
+  }
+}
+
+/** spot end*/
+/** spot end*/
+
+/** strategies start*/
+/** strategies start*/
+.strategy-container {
+  width: 90%;
+  margin: 0 auto;
+  .action1 {
+    width: 160px;
+  }
+  .action2 {
+    width: 120px;
+  }
+}
+
+/** strategies end*/
+/** strategies end*/
+
+/** future start*/
+/** future start*/
+.future-container {
+  width: 90%;
+  margin: 0 auto;
+  .future-operation {
+    padding: 20px 0;
+    .merge-btn {
+      margin: 0 10px;
+    }
+  }
+}
+
+/** future end*/
+/** future end*/
+
+.modal-stg-table {
+  max-width: 100%;
+  .table-box {
+    width: 100%;
+    overflow: auto;
+  }
+}
+
+.table-box-container {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 20px 20px 30px;
+  background: #fcfcfc;
+
+  .table-box {
+    width: 100%;
+    overflow: auto;
+  }
+}
