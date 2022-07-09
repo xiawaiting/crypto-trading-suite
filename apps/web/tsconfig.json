@@ -36,4 +36,19 @@
       "@utils/*": ["utils/*"],
       "@services/*": ["services/*"],
       "@stores/*": ["stores/*"],
-      "@common/*": ["common/*"]
+      "@common/*": ["common/*"],
+      "@layouts/*": ["layouts/*"],
+      "@components/*": ["components/*"],
+      "@editor/*": ["editor/*"],
+      "@modules/*": ["modules/*"],
+      "@drawers/*": ["drawers/*"]
+    },
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "incremental": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve"
+  }
+}
